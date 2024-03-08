@@ -1,20 +1,21 @@
 import uuid
-from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from db import stores
+from schemas.schemas import StoreSchema
 
 blp = Blueprint("stores", __name__, description="Operations on stores")
 
+
 @blp.route("/store/<string:store_id>")
 class Store(MethodView):
-    def get(self,store_id):
+    def get(self, store_id):
         try:
             return stores[store_id]
         except KeyError:
             abort(404, message="store not found")
 
-    def delete(self,store_id):
+    def delete(self, store_id):
         try:
             del stores[store_id]
             return {"message": "Store deleted."}
@@ -27,8 +28,8 @@ class StoreList(MethodView):
     def get(self):
         return {"stores": list(stores.values())}
 
-    def post(self):
-        store_data = request.get_json()
+    @blp.arguments(StoreSchema)
+    def post(self, store_data):
         if "name" not in store_data:
             abort(
                 400,
